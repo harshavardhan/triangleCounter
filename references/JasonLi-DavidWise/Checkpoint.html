@@ -1,0 +1,64 @@
+
+<!-- saved from url=(0059)https://www.andrew.cmu.edu/user/dwise/15418/checkpoint.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>CMU 15-418/618 (Spring 2014) Final Project Checkpoint</title>
+    <link rel="stylesheet" type="text/css" href="./CMU 15-418_618 (Spring 2014) Final Project Checkpoint_files/style.css">
+  </head>
+  <body>
+    <div class="constrainedWidth">
+      <div style="padding-bottom: 10px;">
+	<div class="title smallTitle">Project Checkpoint:</div>
+	<div class="title" style="width: 900px; padding-bottom: 6px; border-bottom: #000000 2px solid;">
+	  Counting k-cliques in Parallel
+	</div>
+      </div>
+
+      <div class="boldText">
+	<div>Jason Li and David Wise</div>
+      </div>
+    </div>
+
+    <div class="section">Summary</div>
+    <p>In an undirected graph, a k-clique is a set of k nodes such that every pair of these k nodes is connected by an edge. Counting k-cliques in a graph finds applications in social networks among other fields, as it gives insight into how the graph is connected. The goal of our project is to design a fast, efficient parallel implementation of k-clique counting on large graphs.
+    </p>
+
+    <div class="section">Progress so far</div>
+    <p>Most of our progress so far has been researching the subject by examining various papers related to our topic. We have also been refining exactly what part of counting k-cliques we want to focus our project on. (For example, we could try to come up with our own algorithm, implement it on specialized hardware, or beat an existing implementation.)
+
+    </p><p>The most relevant paper we've found is <a href="./Checkpoint_files/1403.0734.pdf">Clique counting in MapReduce: theory and experiments</a>. This paper includes the fastest known algorithm for counting k-cliques, and the k=3 case is as fast as the best known solution for counting triangles. Additionally, the paper includes a probablistic approximation algorithm that runs faster and uses less space. The paper's discussion of implementation (as expected from the title) soley pertains to MapReduce. Since it seems unlikely that we could improve their theoretical result, we are interested in designing a parallel implementation of their algorithm that is competitive with existing implementations. We have not tried existing libraries to get benchmarks yet, but we're interesting in doing this so that we have a metric for our project. It seems that <a href="https://dato.com/products/create/open_source.html">GraphLab</a> is one possibility, but we haven't looked into whether it can take advantage of multiple processors to make it a fair comparison.</p>
+
+    <p>We implemented a sequential version of the O(m<sup>3/2</sup>) triangle-counting algorithm from the above paper, which is generalizable to k-cliques. This implementation runs in around 10 seconds on a graph with 11 million edges. We thought about ways to parallelize this algorithm. (Doing this well isn't completely obvious because the original paper discussed how to implement the algorithm in a map-reduce setting.) The algorithm is divided cleanly into two parts. The first part is to sort the vertices by degree, which can be done with a linear-time radix sort. Parallelizing this radix sort will be a challenging problem on its own. The second part is to count the triangles using the sorted graph. Here, there are many opportunities for parallelism. For example, each vertex has its own neighborhood in which to compute triangles, and the triangles can all be counted separately.</p>
+
+    <p>Another area we've looked into so far has been data to test our implementation on. We have found some test cases online, mostly from <a href="https://snap.stanford.edu/index.html">SNAP</a>. Fortunately, this site provides the number of triangles in the graphs, so we know the correct number of triangles for each test case.</p>
+
+    <p>We have accomplished everything in weeks 1 and 2 except for implementing a parallel algorithm. The biggest step into implementing the parallel algorithm is to determine which parallel framework to choose (e.g. ISPC, OpenMP, MPI, etc.). Even so, we believe that we will be able to accomplish everything we plan. We believe that by carefully brainstorming methods of parallelism, we will avoid needing to restructure large portions of the algorithm later. In addition, from our reading, it seems that the approximation k-clique counting algorithms also seem appealing, so we might also try to implement some of those in parallel.</p>
+
+    <p>For the parallelism competition, we aim to show a demo of the algorithm, as well as how it is parallelized. In addition, we will show graphs of the performance of this algorithm in comparison to algorithms from popular graph libraries. We will also discuss what challenges we encountered implementing the algorithm in a parallel setting (as opposed to map-reduce), and what our solutions were.</p>
+
+    <div class="section">Goals and deliverables</div>
+    <p>At this point our plans for goals and deliverables are mostly the same as they were in the proposal. We're unlikely to compare our results to the team that worked on the 2013 project, because we don't plan to use CUDA. However, we'd still like to get a good speedup and be competitive with existing implementations. A "nice-to-have" would be to beat a library such as GraphLab if we can find a fair comparison.</p>
+
+    <div class="section">Challenges</div>
+    <p>When we first proposed our project, we were interested in potentially designing our own algorithm to parallelize k-clique counting, which was a natural generalization of <a href="http://www.cs.cmu.edu/afs/cs/user/shuhaoy/www/Final_Project.pdf">a 2013 project</a> which counted triangles. However, after some research it became clear that improving upon the best known algorithm would likely be quite difficult. As a result, our focus at this point is on the implementation concerns with this algorithm. One of the first decisions we plan to make over the following weeks is what type of parallel framework to work in. We are hesistant about using CUDA, since it does not seem well-suited to big-data problems such as this. (Indeed, the project from 2013 referenced above chose CUDA for their implemenation and found cache issues to be a primary concern.) As such, we are considering ISPC, OpenMP, and MPI, or even possibly some combination of them. (Hybrid OpenMP and MPI seems to be commonly used.) We might even experiment with implemenations in each and to gauge performance and understand the relative difficulties of each.</p>
+
+<div class="section">Revised Schedule</div>
+<p>
+<table class="projectSchedule">
+<tbody><tr>
+  <td width="110"><span style="font-weight: bold;">Time Period</span></td>
+  <td width="380"><span style="font-weight: bold;">What We Plan to Do</span></td>
+</tr>
+<tr><td>4/20~4/26</td><td>Get a parallel version of the exact sequential triangle-counting algorithm working (Jason). Also, download some graph libraries and test their performances(Daivd).</td></tr>
+<tr><td>4/27~4/29</td><td>Try to improve the performance of the parallel algorithm (Jason). Try to optimize the radix-type sort (David).</td></tr>
+<tr><td>4/30~5/2</td><td>Generalize the algorithm to k-cliques (Jason).</td></tr>
+<tr><td>5/2~5/5</td><td>Include some random sampling to give approximations (David).</td></tr>
+<tr><td>5/5~5/8</td><td>Write report (Jason and David).</td></tr>
+</tbody></table>
+</p>
+
+
+
+
+
+
+</body></html>
