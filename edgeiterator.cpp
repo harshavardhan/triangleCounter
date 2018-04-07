@@ -26,8 +26,13 @@ int main(){
 	for (int i = 0 ; i < edges ; i++){
 		int node1,node2;
 		cin >> node1 >> node2;
-		edge[node1].push_back(node2);
-		edge[node2].push_back(node1);
+		if(node1 < node2){
+			edge[node1].push_back(node2);
+		}
+		else{
+			edge[node2].push_back(node1);
+		}
+		
 	
 	}
 	for(int i = 0; i < vertices ; i++){
