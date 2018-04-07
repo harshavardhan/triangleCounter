@@ -2,8 +2,8 @@
 using namespace std;
 
 vector<set<int>> V;
-long int n, m, numOfTriangles;
-
+long long int numOfTriangles;
+int n, m;
 void readFile(){
     int n1, n2;
     for (size_t i = 0; i < m; i++) {
