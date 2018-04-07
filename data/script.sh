@@ -1,6 +1,11 @@
 if [ -d "modified" ];then rm -r modified/; fi
 mkdir modified
-orig='original/'
 for file in original/*; do
-    python3 dataSetFormatter.py $file
+	y="original/readme.txt"
+	if [ $file != $y ]
+	then
+		python3 dataSetFormatter.py $file
+	fi
 done
+touch modified/readme.txt
+echo "This directory contains modified datasets after passing data to dataSetFormatter.py" > modified/readme.txt	
