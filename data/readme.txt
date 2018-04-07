@@ -13,3 +13,12 @@ Each file is of the format:
     .
     .
     <node> <node>
+
+
+Triangles in DataSets:
+    facebook_combined.txt : 1612010
+    CA-GrQc.txt           : 48260
+    CA-AstroPh.txt        : 1351441
+    CA-HelpPh.txt         : 3358499
+    CA-HelpTh.txt         : 28339
+    CA-CondMat.txt        : 173361
