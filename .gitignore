@@ -1,3 +1,8 @@
-data/*
+data/modified/*
+data/original/*
 !data/readme.txt
+!data/modified/readme.txt
+!data/original/readme.txt
+!data/readme.txt
+!data/script.sh
 !data/dataSetFormatter.py

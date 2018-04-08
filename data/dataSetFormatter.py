@@ -38,7 +38,7 @@ with open(sys.argv[1], "r") as ins:
                 pair_map[(low, high)] = 1
                 lineCounter += 1
 
-newFile  = open(sys.argv[1]+"updated", "w")
+newFile  = open("modified/"+sys.argv[1][9:], "w")
 newFile.write(str(n) + " " + str(lineCounter) + "\n")
 for i in pair_map.keys():
     newFile.write(str(i[0]) + " " + str(i[1]) + "\n")
