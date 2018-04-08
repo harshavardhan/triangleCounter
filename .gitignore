@@ -1,5 +1,6 @@
 data/modified/*
 data/original/*
+data/liveJournal_modified_graph.txt
 !data/readme.txt
 !data/modified/readme.txt
 !data/original/readme.txt
