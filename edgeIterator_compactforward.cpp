@@ -43,7 +43,7 @@ int main(){
 		degree[node1]++; degree[node2]++;
 	}
 	for(int i = 0 ;i < stEdges.size(); i++) {
-		if(degree[stEdges[i].first] >= degree[stEdges[i].second]) {
+		if(degree[stEdges[i].first] <= degree[stEdges[i].second]) {
 			edge[stEdges[i].first].push_back(stEdges[i].second);
 		}
 		else {
