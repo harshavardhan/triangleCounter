@@ -6,15 +6,26 @@ int vertices,edges;
 vector<vector<int> > edge;
 
 ll numTri() {
-	ll ret = 0;
+	ll common = 0;
+	
 	for(int i =0; i< vertices ; i++){
+		// #pragma omp parallel for reduction(+:common)
 		for(int j = 0;j < edge[i].size();j++) {
-			vector<int> v3;
-			set_intersection(edge[i].begin(),edge[i].end(),edge[edge[i][j]].begin(),edge[edge[i][j]].end(),back_inserter(v3));
-			ret += v3.size();
+			int p = 0,q = 0,r = edge[i].size(),s = edge[edge[i][j]].size();
+			while(p < r and q < s) {
+				if(edge[i][p] == edge[edge[i][j]][q]) {
+					p++; q++; common++;
+				}
+				else if(edge[i][p] < edge[edge[i][j]][q]) p++;
+				else q++;
+			}
+			
+			// vector<int> v3;
+			// set_intersection(edge[i].begin(),edge[i].end(),edge[edge[i][j]].begin(),edge[edge[i][j]].end(),back_inserter(v3));
+			// ret += v3.size();
 		}
 	}
-	return ret;
+	return common;
 }
 
 int main(){
