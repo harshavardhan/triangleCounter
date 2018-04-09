@@ -2,16 +2,24 @@
 #include <mpi.h>
 using namespace std;
 
-#define READ_INT(n) {char c; n = getchar_unlocked() - '0'; while((c = getchar_unlocked()) >= '0') n = (n << 3) + (n << 1) + c - '0';}
+int id, size;
+int n,m,*edg,*degree,*startNode,*endNode;
+vector<pair<int,int> > stEdges;
+int begin_edge, end_edge;
 
+void mpi_init(){
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &id);
+}
 
 void mpi_end(){
     MPI_Finalize();
 }
 
-long long numTri(int begin_edge, int end_edge, int *startNode, int*endNode, int * edg, int m) {
+long long numTri() {
 	long long ret = 0;
-	for(int i=begin_edge;i<end_edge;i++) {
+	for(int i=begin_edge;i<=end_edge;i++) {
 		int u = edg[i],v = edg[m+i];
 		int su = startNode[u],eu = endNode[u]; int sv = startNode[v],ev = endNode[v];
 		if(su != -1 and sv != -1) {
@@ -27,27 +35,25 @@ long long numTri(int begin_edge, int end_edge, int *startNode, int*endNode, int 
 	return ret;
 }
 
-void begin_end_assign(int m, int * begin_edge, int * end_edge, int size, int id){
+void begin_end_assign(){
     int rem = m%size;
     int count = m/size;
     if(id < rem){
-        *begin_edge = id * (count + 1);
-        *end_edge = *begin_edge + count;
+        begin_edge = id * (count + 1);
+        end_edge = begin_edge + count;
     }else{
-        *begin_edge = id*count + rem;
-        *end_edge = *begin_edge + count -1 ;
+        begin_edge = id*count + rem;
+        end_edge = begin_edge + count -1 ;
     }
 }
 
-void read_edges(int n, int m, int * degree, int * startNode, int * endNode, int *edg){
-    vector<pair<int,int> > stEdges;
-
+void read_edges(){
     for(int i=0;i<n;i++) {
         degree[i] = -1; startNode[i] = -1; endNode[i] = -1;
     }
     for(int i = 0 ; i < m ; i++) {
         int node1,node2;
-        READ_INT(node1); READ_INT(node2);
+        cin >> node1 >> node2;
         stEdges.push_back(make_pair(node1,node2));
         degree[node1]++; degree[node2]++;
     }
@@ -66,22 +72,12 @@ void read_edges(int n, int m, int * degree, int * startNode, int * endNode, int 
 
 int main(int argc, char** argv){
 
-    MPI_Init(NULL, NULL);
-
-    int id, size;
-
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &id);
-
-    int n,m,*edg,*degree,*startNode,*endNode;
-    int begin_edge, end_edge;
-
+    mpi_init();
 
     if(id == 0){
-        READ_INT(n);
-        READ_INT(m);
+        cin >> n >> m;
     }
-
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -91,25 +87,24 @@ int main(int argc, char** argv){
     endNode = (int *) malloc(n * sizeof(int));
 
     if(id == 0){
-        read_edges(n, m, degree, startNode, endNode, edg);
+        read_edges();
     }
-
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(edg, 2*m, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(degree, n, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(startNode, n, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(endNode, n, MPI_INT, 0, MPI_COMM_WORLD);
 
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    begin_end_assign(m, &begin_edge, &end_edge, size, id);
+    begin_end_assign();
 
     double start_time = MPI_Wtime();
 
-    long long num_triangles = numTri(begin_edge, end_edge, startNode, endNode, edg, m);
+    long long num_triangles = numTri();
 
-    long long totalTriangles;
+    long long totalTriangles = 0;
 
-    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&num_triangles, &totalTriangles, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
     if(id == 0)
