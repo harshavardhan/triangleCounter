@@ -5,6 +5,8 @@ using namespace std;
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
+#include <thrust/sort.h>
+#include <thrust/execution_policy.h>
 
 int n,m,*edg,*degree,*startNode,*endNode;
 thrust::host_vector<thrust::pair<int,int> > stEdges;
@@ -21,10 +23,10 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-// __restrict__ use ?
+
 // use 64 bits for sort ?
 
-__global__ void numTri(int m,int * edg,int * startNode,int * endNode,int * result) {
+__global__ void numTri(int m,int * __restrict__ edg,int * __restrict__ startNode,int * __restrict__ endNode,int * result) {
     int t = blockDim.x * blockIdx.x + threadIdx.x,ret = 0;
     int numThreads = gridDim.x * blockDim.x; 
     for(int i=t;i<m;i += numThreads) {
@@ -79,9 +81,14 @@ int main() {
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		if(degree[stEdges[i].first] > degree[stEdges[i].second]) {
 			thrust::swap(stEdges[i].first,stEdges[i].second);
+			swap(stEdges[i].first,stEdges[i].second);
+
 		}
 	}
-	thrust::sort(thrust::device,stEdges.begin(),stEdges.end());
+	thrust::device_vector<thrust::pair<int,int> > dEdg = stEdges;
+	thrust::sort(dEdg.begin(),dEdg.end());
+	stEdges = dEdg;
+	
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		edg[i] = stEdges[i].first; edg[i+m] = stEdges[i].second;
 		if(startNode[stEdges[i].first] == -1) startNode[stEdges[i].first] = i;
@@ -91,11 +98,12 @@ int main() {
 	GET_TIME(start);
 	setupDeviceMemory();
 	numTri<<<blocks_per_grid,threads_per_block>>>(m,dedg,dstartNode,dendNode,dresult);
-	printf("%s\n","End");
+	cudaDeviceSynchronize();
 	thrust::device_ptr<int> dptr(dresult);
 	int  result = thrust::reduce(dptr,dptr+(threads_per_block*blocks_per_grid));
 	printf("%d\n",result);
 	GET_TIME(finish);
+	cudaDeviceSynchronize();
 	freeDeviceMemory();
 	printf("Elapsed time = %e seconds\n",finish - start);
 }
