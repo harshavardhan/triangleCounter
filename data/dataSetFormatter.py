@@ -40,6 +40,7 @@ with open(sys.argv[1], "r") as ins:
 
 newFile  = open("modified/"+sys.argv[1][9:], "w")
 newFile.write(str(n) + " " + str(lineCounter) + "\n")
+# for i in sorted(pair_map.keys()):
 for i in pair_map.keys():
     newFile.write(str(i[0]) + " " + str(i[1]) + "\n")
 newFile.close()

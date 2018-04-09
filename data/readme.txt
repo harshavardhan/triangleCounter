@@ -20,8 +20,9 @@ Triangles in DataSets:
     CA-AstroPh.txt        : 1351441
     CA-CondMat.txt        : 173361
     CA-GrQc.txt           : 48260
-    CA-HepPh.txt         : 3358499
-    CA-HepTh.txt         : 28339
+    CA-HepPh.txt          : 3358499
+    CA-HepTh.txt          : 28339
+    LiveJournal           : 177820130
 
 
 nodeiterator : 1889.92seconds
