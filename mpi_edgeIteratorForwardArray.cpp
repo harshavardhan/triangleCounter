@@ -54,7 +54,6 @@ void read_edges(){
     }
     for(int i = 0 ; i < m ; i++) {
         int node1,node2;
-        cin >> node1 >> node2;
         scanf("%d %d", &node1, &node2);
         stEdges.push_back(make_pair(node1,node2));
         degree[node1]++; degree[node2]++;
@@ -79,7 +78,6 @@ int main(int argc, char** argv){
     double start, end;
 
     if(id == 0){
-        cin >> n >> m;
         scanf("%d %d", &n, &m);
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -107,7 +105,7 @@ int main(int argc, char** argv){
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(id == 0){
-        printf("Process 0 is broadcasting data\n", );
+        printf("Process 0 is broadcasting data\n" );
         GET_TIME(start);
     }
     MPI_Bcast(edg, 2*m, MPI_INT, 0, MPI_COMM_WORLD);
@@ -123,11 +121,11 @@ int main(int argc, char** argv){
     }
     begin_end_assign();
 
-    printf("Process %d Starting Computation for counting Triangles\n\n", id);
+    printf("Process %d Starting Computation for counting Triangles\n", id);
     GET_TIME(start);
     long long num_triangles = numTri();
     GET_TIME(end);
-    cout << "Process-"<< id <<" : Time taken for computation  of triangles = "<< end - start <<" seconds" << endl;
+    printf("Process-%d : Time taken for computation  of triangles = %e seconds\n", end-start);
     long long totalTriangles = 0;
 
     MPI_Reduce(&num_triangles, &totalTriangles, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
