@@ -78,6 +78,8 @@ int main(int argc, char** argv){
     double start, end;
 
     if(id == 0){
+        FILE * file;
+        freopen(argv[1], "r", stdin);
         scanf("%d %d", &n, &m);
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -125,7 +127,7 @@ int main(int argc, char** argv){
     GET_TIME(start);
     long long num_triangles = numTri();
     GET_TIME(end);
-    printf("Process-%d : Time taken for computation  of triangles = %e seconds\n", end-start);
+    printf("Process-%d : Time taken for computation  of triangles = %e seconds\n", id, end-start);
     long long totalTriangles = 0;
 
     MPI_Reduce(&num_triangles, &totalTriangles, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
