@@ -26,15 +26,25 @@ __global__ void numTri(int m,int * __restrict__ edg,int * __restrict__ startNode
     int t = blockDim.x * blockIdx.x + threadIdx.x,ret = 0;
     int numThreads = gridDim.x * blockDim.x; 
     if(t < m) {
-    	for(int i=t;i<m;i += numThreads) {
+    	int rem = m % numThreads,count = m/numThreads,st,en;
+	    if(t < rem) {
+	        st = t * (count + 1);
+	        en = st + count;
+	    }
+	    else {
+	        st = t*count + rem;
+	        en = st + count - 1 ;
+	    }
+    	for(int i=st;i<=en;i++) {
 	    	int u = edg[i],v = edg[m+i];
 			int su = startNode[u],eu = endNode[u]; int sv = startNode[v],ev = endNode[v];
 			if(su != -1 and sv != -1) {
 				while(su <= eu and sv <= ev) {
-					if(edg[su+m] == edg[sv+m]) {
+					int diff = edg[su+m]-edg[sv+m];
+					if(diff == 0) {
 						su++; sv++; ret++;
 					}
-					else if(edg[su+m] > edg[sv+m]) sv++;
+					else if(diff > 0) sv++;
 					else su++;
 				}
 			}
