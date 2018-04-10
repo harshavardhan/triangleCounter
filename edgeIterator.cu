@@ -7,7 +7,7 @@ using namespace std;
 #include <thrust/device_vector.h>
 
 int n,m,*edg,*degree,*startNode,*endNode;
-vector<pair<int,int> > stEdges;
+thrust::host_vector<thrust::pair<int,int> > stEdges;
 int md,*dedg,*dstartNode,*dendNode,*dresult;
 int threads_per_block = 1024,blocks_per_grid = 16;
 
@@ -73,15 +73,15 @@ int main() {
 	for(int i = 0 ; i < m ; i++) {
 		int node1,node2;
 		READ_INT(node1); READ_INT(node2);
-		stEdges.push_back(make_pair(node1,node2));
+		stEdges.push_back(thrust::make_pair(node1,node2));
 		degree[node1]++; degree[node2]++;
 	}
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		if(degree[stEdges[i].first] > degree[stEdges[i].second]) {
-			swap(stEdges[i].first,stEdges[i].second);
+			thrust::swap(stEdges[i].first,stEdges[i].second);
 		}
 	}
-	sort(stEdges.begin(),stEdges.end());
+	thrust::sort(thrust::device,stEdges.begin(),stEdges.end());
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		edg[i] = stEdges[i].first; edg[i+m] = stEdges[i].second;
 		if(startNode[stEdges[i].first] == -1) startNode[stEdges[i].first] = i;
@@ -91,6 +91,7 @@ int main() {
 	GET_TIME(start);
 	setupDeviceMemory();
 	numTri<<<blocks_per_grid,threads_per_block>>>(m,dedg,dstartNode,dendNode,dresult);
+	printf("%s\n","End");
 	thrust::device_ptr<int> dptr(dresult);
 	int  result = thrust::reduce(dptr,dptr+(threads_per_block*blocks_per_grid));
 	printf("%d\n",result);
