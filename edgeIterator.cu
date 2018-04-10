@@ -10,7 +10,7 @@ using namespace std;
 int n,m,*edg,*degree,*startNode;
 thrust::host_vector<thrust::pair<int,int> > stEdges;
 int md,*dedg,*dstartNode,*dresult;
-int threads_per_block = 1024,blocks_per_grid = 16;
+int threads_per_block = 512,blocks_per_grid = 32;
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
@@ -22,7 +22,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-__global__ void numTri(int m,int * __restrict__ edg,int * __restrict__ startNode,int * result) {
+__global__ void numTri(int m,const int * __restrict__ edg,const int * __restrict__ startNode,int * result) {
     int t = blockDim.x * blockIdx.x + threadIdx.x,ret = 0;
     int numThreads = gridDim.x * blockDim.x; 
     if(t < m) {
