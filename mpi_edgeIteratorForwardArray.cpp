@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include <mpi.h>
+#include "timer.h"
 using namespace std;
 
 int id, size;
@@ -53,7 +54,7 @@ void read_edges(){
     }
     for(int i = 0 ; i < m ; i++) {
         int node1,node2;
-        cin >> node1 >> node2;
+        scanf("%d %d", &node1, &node2);
         stEdges.push_back(make_pair(node1,node2));
         degree[node1]++; degree[node2]++;
     }
@@ -74,8 +75,10 @@ int main(int argc, char** argv){
 
     mpi_init();
 
+    double start, end;
+
     if(id == 0){
-        cin >> n >> m;
+        scanf("%d %d", &n, &m);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -92,29 +95,43 @@ int main(int argc, char** argv){
     startNode = (int *) malloc(n * sizeof(int));
     endNode = (int *) malloc(n * sizeof(int));
 
+
     if(id == 0){
+        printf("\nReading Input File\n\n");
+        GET_TIME(start);
         read_edges();
+        GET_TIME(end);
+        printf("Reading Input and adding it to data took %e seconds\n\n", end - start);
     }
     MPI_Barrier(MPI_COMM_WORLD);
+    if(id == 0){
+        printf("Process 0 is broadcasting data\n" );
+        GET_TIME(start);
+    }
     MPI_Bcast(edg, 2*m, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(degree, n, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(startNode, n, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(endNode, n, MPI_INT, 0, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
-
+    if(id == 0){
+        GET_TIME(end);
+        printf("All the processes received data\n" );
+        printf("Time taken by all the processes to recieve the data = %e\n", end - start);
+    }
     begin_end_assign();
 
-    double start_time = MPI_Wtime();
-
+    printf("Process %d Starting Computation for counting Triangles\n", id);
+    GET_TIME(start);
     long long num_triangles = numTri();
-
+    GET_TIME(end);
+    printf("Process-%d : Time taken for computation  of triangles = %e seconds\n", end-start);
     long long totalTriangles = 0;
 
     MPI_Reduce(&num_triangles, &totalTriangles, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
     if(id == 0)
-        printf("Total number of triangles = %lld. Time taken = %lf seconds\n", totalTriangles, MPI_Wtime() - start_time );
+        cout<<"Total number of triangles = "<< totalTriangles <<endl;
 
     // free(edg);
     // free(degree);

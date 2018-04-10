@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
+#include "timer.h"
 using namespace std;
-#define READ_INT(n) {char c; n = getchar_unlocked() - '0'; while((c = getchar_unlocked()) >= '0') n = (n << 3) + (n << 1) + c - '0';}
 
 int n,m,*edg,*degree,*startNode,*endNode;
 vector<pair<int,int> > stEdges;
@@ -24,7 +24,9 @@ long long numTri() {
 }
 
 int main() {
-	READ_INT(n); READ_INT(m);
+	double start, end;
+
+	scanf("%d %d",&n, &m );
 	edg = (int *) malloc(2*m * sizeof(int));
 	degree = (int *) malloc(n * sizeof(int));
 	startNode = (int *) malloc(n * sizeof(int));
@@ -32,12 +34,20 @@ int main() {
 	for(int i=0;i<n;i++) {
 		degree[i] = -1; startNode[i] = -1; endNode[i] = -1;
 	}
+
+	printf("\nReading Input File\n\n");
+	GET_TIME(start);
 	for(int i = 0 ; i < m ; i++) {
 		int node1,node2;
-		READ_INT(node1); READ_INT(node2);
+		scanf("%d %d", &node1, &node2 );
 		stEdges.push_back(make_pair(node1,node2));
 		degree[node1]++; degree[node2]++;
 	}
+	GET_TIME(end);
+    printf("Reading Input and adding it to data structure took %e seconds\n\n", end - start);
+
+	printf("Sorting and Organising data\n");
+	GET_TIME(start);
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		if(degree[stEdges[i].first] > degree[stEdges[i].second]) {
 			swap(stEdges[i].first,stEdges[i].second);
@@ -49,8 +59,12 @@ int main() {
 		if(startNode[stEdges[i].first] == -1) startNode[stEdges[i].first] = i;
 		endNode[stEdges[i].first] = i;
 	}
-	const clock_t begin_time = clock();
+	GET_TIME(end);
+    printf("Sorting and Organising Data took %e seconds\n\n", end - start);
+
+	printf("Computing Triangles\n" );
+	GET_TIME(start);
 	cout << numTri() << "\n";
-	const clock_t end_time = clock();
-	cout << "Time taken " << float(end_time - begin_time)/CLOCKS_PER_SEC << "seconds" << endl;
+	GET_TIME(end);
+	cout << "Time taken for computation  = "<< end - start <<" seconds" << endl;
 }
