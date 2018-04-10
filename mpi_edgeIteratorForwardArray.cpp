@@ -4,7 +4,6 @@ using namespace std;
 
 int id, size;
 int n,m,*edg,*degree,*startNode,*endNode;
-vector<pair<int,int> > stEdges;
 int begin_edge, end_edge;
 
 void mpi_init(){
@@ -48,6 +47,7 @@ void begin_end_assign(){
 }
 
 void read_edges(){
+    vector<pair<int,int> > stEdges;
     for(int i=0;i<n;i++) {
         degree[i] = -1; startNode[i] = -1; endNode[i] = -1;
     }
@@ -81,6 +81,12 @@ int main(int argc, char** argv){
     MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
+    if(m < size){
+        if(id == 0)
+            printf("More number of processors! Number of processors shouls not exceed number of edges\n");
+        MPI_Finalize();
+    }
+
     edg = (int *) malloc(2*m * sizeof(int));
     degree = (int *) malloc(n * sizeof(int));
     startNode = (int *) malloc(n * sizeof(int));
@@ -110,5 +116,9 @@ int main(int argc, char** argv){
     if(id == 0)
         printf("Total number of triangles = %lld. Time taken = %lf seconds\n", totalTriangles, MPI_Wtime() - start_time );
 
+    // free(edg);
+    // free(degree);
+    // free(startNode);
+    // free(endNode);
     mpi_end();
 }
