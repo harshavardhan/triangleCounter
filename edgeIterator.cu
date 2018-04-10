@@ -1,6 +1,5 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define READ_INT(n) {char c; n = getchar_unlocked() - '0'; while((c = getchar_unlocked()) >= '0') n = (n << 3) + (n << 1) + c - '0';}
 #include "timer.h"
 
 #include <thrust/host_vector.h>
@@ -23,24 +22,23 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-
-// use 64 bits for sort ?
-
 __global__ void numTri(int m,int * __restrict__ edg,int * __restrict__ startNode,int * __restrict__ endNode,int * result) {
     int t = blockDim.x * blockIdx.x + threadIdx.x,ret = 0;
     int numThreads = gridDim.x * blockDim.x; 
-    for(int i=t;i<m;i += numThreads) {
-    	int u = edg[i],v = edg[m+i];
-		int su = startNode[u],eu = endNode[u]; int sv = startNode[v],ev = endNode[v];
-		if(su != -1 and sv != -1) {
-			while(su <= eu and sv <= ev) {
-				if(edg[su+m] == edg[sv+m]) {
-					su++; sv++; ret++;
+    if(t < m) {
+    	for(int i=t;i<m;i += numThreads) {
+	    	int u = edg[i],v = edg[m+i];
+			int su = startNode[u],eu = endNode[u]; int sv = startNode[v],ev = endNode[v];
+			if(su != -1 and sv != -1) {
+				while(su <= eu and sv <= ev) {
+					if(edg[su+m] == edg[sv+m]) {
+						su++; sv++; ret++;
+					}
+					else if(edg[su+m] > edg[sv+m]) sv++;
+					else su++;
 				}
-				else if(edg[su+m] > edg[sv+m]) sv++;
-				else su++;
 			}
-		}
+	    }
     }
     result[t] = ret;
 }
@@ -51,7 +49,7 @@ void setupDeviceMemory() {
 	gpuErrchk(cudaMalloc(&dedg,sizeEdg));
 	gpuErrchk(cudaMalloc(&dstartNode,sizeVer));
 	gpuErrchk(cudaMalloc(&dendNode,sizeVer));
-	gpuErrchk(cudaMalloc(&dresult,tem)); gpuErrchk(cudaMemset(dresult,0,tem)); 
+	gpuErrchk(cudaMalloc(&dresult,tem));  
    	gpuErrchk(cudaMemcpy(dedg,edg,sizeEdg,cudaMemcpyHostToDevice));
    	gpuErrchk(cudaMemcpy(dstartNode,startNode,sizeVer,cudaMemcpyHostToDevice));
    	gpuErrchk(cudaMemcpy(dendNode,endNode,sizeVer,cudaMemcpyHostToDevice));
@@ -63,32 +61,29 @@ void freeDeviceMemory() {
 }
 
 int main() {
-	READ_INT(n); READ_INT(m);
+	scanf("%d %d",&n,&m);
 	int sizeVer = n * sizeof(int),sizeEdg = 2*m * sizeof(int);
 	edg = (int *) malloc(sizeEdg);
 	degree = (int *) malloc(sizeVer);
 	startNode = (int *) malloc(sizeVer);
 	endNode = (int *) malloc(sizeVer);
 	for(int i=0;i<n;i++) {
-		degree[i] = -1; startNode[i] = -1; endNode[i] = -1;
+		degree[i] = 0; startNode[i] = -1; endNode[i] = -1;
 	}
 	for(int i = 0 ; i < m ; i++) {
 		int node1,node2;
-		READ_INT(node1); READ_INT(node2);
-		stEdges.push_back(thrust::make_pair(node1,node2));
+		scanf("%d %d",&node1,&node2);
+		stEdges.push_back(make_pair(node1,node2));
 		degree[node1]++; degree[node2]++;
 	}
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		if(degree[stEdges[i].first] > degree[stEdges[i].second]) {
-			thrust::swap(stEdges[i].first,stEdges[i].second);
 			swap(stEdges[i].first,stEdges[i].second);
-
 		}
 	}
 	thrust::device_vector<thrust::pair<int,int> > dEdg = stEdges;
 	thrust::sort(dEdg.begin(),dEdg.end());
 	stEdges = dEdg;
-	
 	for(int i = 0 ;i < stEdges.size(); i++) {
 		edg[i] = stEdges[i].first; edg[i+m] = stEdges[i].second;
 		if(startNode[stEdges[i].first] == -1) startNode[stEdges[i].first] = i;
@@ -101,7 +96,7 @@ int main() {
 	cudaDeviceSynchronize();
 	thrust::device_ptr<int> dptr(dresult);
 	int  result = thrust::reduce(dptr,dptr+(threads_per_block*blocks_per_grid));
-	printf("%d\n",result);
+	cout << result << "\n";
 	GET_TIME(finish);
 	cudaDeviceSynchronize();
 	freeDeviceMemory();
