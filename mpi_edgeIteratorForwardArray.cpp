@@ -6,6 +6,8 @@ using namespace std;
 int id, size;
 int n,m,*edg,*degree,*startNode,*endNode;
 int begin_edge, end_edge;
+vector<pair<int,int> > stEdges;
+
 
 void mpi_init(){
     MPI_Init(NULL, NULL);
@@ -48,7 +50,6 @@ void begin_end_assign(){
 }
 
 void read_edges(){
-    vector<pair<int,int> > stEdges;
     for(int i=0;i<n;i++) {
         degree[i] = -1; startNode[i] = -1; endNode[i] = -1;
     }
@@ -58,6 +59,8 @@ void read_edges(){
         stEdges.push_back(make_pair(node1,node2));
         degree[node1]++; degree[node2]++;
     }
+}
+void sort_computation(){
     for(int i = 0 ;i < stEdges.size(); i++) {
         if(degree[stEdges[i].first] > degree[stEdges[i].second]) {
             swap(stEdges[i].first,stEdges[i].second);
@@ -104,6 +107,11 @@ int main(int argc, char** argv){
         read_edges();
         GET_TIME(end);
         printf("Reading Input and adding it to data took %e seconds\n\n", end - start);
+        printf("\nSorting Data\n\n");
+        GET_TIME(start);
+        sort_computation();
+        GET_TIME(end);
+        printf("Sorting data took %e seconds\n\n", end - start);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(id == 0){
@@ -123,17 +131,17 @@ int main(int argc, char** argv){
     }
     begin_end_assign();
 
+    long long totalTriangles = 0;
     printf("Process %d Starting Computation for counting Triangles\n", id);
     GET_TIME(start);
     long long num_triangles = numTri();
-    GET_TIME(end);
-    printf("Process-%d : Time taken for computation  of triangles = %e seconds\n", id, end-start);
-    long long totalTriangles = 0;
 
     MPI_Reduce(&num_triangles, &totalTriangles, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    GET_TIME(end);
+    printf("Process-%d : Time taken for computation  of triangles = %e seconds\n", id, end-start);
 
     if(id == 0)
-        cout<<"Total number of triangles = "<< totalTriangles <<endl;
+        printf("Total number of triangles = %lld\n", totalTriangles );
 
     // free(edg);
     // free(degree);
