@@ -1,10 +1,10 @@
-all: nodeIterator edgeIteratorV1 edgeIteratorV2 edgeIteratorV3 sqrtDecompn edgeIteratorCuda mpiEdgeIteratorForwardArray
+all: nodeIterator nodeIteratorCore edgeIteratorV1 edgeIteratorV2 edgeIteratorV3 sqrtDecompn edgeIteratorCuda mpiEdgeIteratorForwardArray
 
 nodeIterator: nodeIterator.cpp
 	g++ nodeIterator.cpp -std=c++11 -o nodeIterator
 
-nodeiteratorCore: nodeIterator_core.cpp
-	g++ nodeIterator_core.cpp -std=c++11 -o nodeiteratorCore
+nodeIteratorCore: nodeIterator_core.cpp
+	g++ nodeIterator_core.cpp -std=c++11 -o nodeIteratorCore
 
 edgeIteratorV1: edgeIterator_forward.cpp
 	g++ edgeIterator_forward.cpp -std=c++11 -o edgeIteratorV1
@@ -25,4 +25,4 @@ mpiEdgeIteratorForwardArray: mpi_edgeIteratorForwardArray.cpp
 	mpicxx mpi_edgeIteratorForwardArray.cpp -o mpiEdgeIteratorForwardArray
 
 clean:
-	rm nodeIterator edgeIteratorV1 edgeIteratorV2 edgeIteratorV3 sqrtDecompn edgeIteratorCuda
+	rm -f nodeIterator nodeIteratorCore edgeIteratorV1 edgeIteratorV2 edgeIteratorV3 sqrtDecompn edgeIteratorCuda mpiEdgeIteratorForwardArray
