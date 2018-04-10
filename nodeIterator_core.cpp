@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "timer.h"
 using namespace std;
 
 vector<set<int>> V;
@@ -9,7 +10,7 @@ int n, m;
 void readFile(){
     int n1, n2;
     for (size_t i = 0; i < m; i++) {
-        cin >> n1 >> n2;
+        scanf("%d %d", &n1, &n2);
         V[n1].insert(n2);
         V[n2].insert(n1);
     }
@@ -36,16 +37,24 @@ void countTriangles(){
 }
 
 int main(){
-    cin >>n >>m;
+    double start, end;
+    scanf("%d %d", &n, &m);
     for (size_t i = 0; i < n; i++) {
         set<int> X;
         V.push_back(X);
     }
+
+    printf("\nReading Input File\n\n");
+    GET_TIME(start);
     readFile();
-    const clock_t begin_time = clock();
+    GET_TIME(end);
+    printf("Reading Input and adding it to data took %e seconds\n\n", end - start);
+
+    printf("Starting Computation for counting Triangles\n\n");
+    GET_TIME(start);
     countTriangles();
-    const clock_t end_time = clock();
+    GET_TIME(end);
 
     cout << "Number of triangles = " << numOfTriangles <<endl;
-    cout << "Time taken is  = " << float(end_time - begin_time)/CLOCKS_PER_SEC << "seconds" << endl;
+    cout << "Time taken for computation  = "<< end - start <<" seconds" << endl;
 }
